@@ -105,27 +105,11 @@ def on_press(key):
     if k in ['f5']:
         print('Starting/Resuming...')
         run_bot = True
-
-def mainGUI():
-    #
-    #   Main gui function
-    #   Used to display information to user and quit the program
-    #
-    rootgui = Tk()
-    rootgui.title('Paste + Log Bot')
-    lbl = Label(rootgui, text = 'f5 = Start/Resume script\nf7 = Pause Script\n\n\nPlease put food and water in slots 8 and 9', justify='center')
-    Button(rootgui, text="Quit", command=quit,justify='center').grid()
-    lbl.grid()
-    
-    rootgui.mainloop()
-    
-    
     
 listener = keyboard.Listener(on_press=on_press)
 listener.start()
 
 while quit_all == True:
-    #mainGUI()
     while run_bot == True:
         passed_values = run(feed_tracker,depo_tracker,logs_timer)
         feed_tracker = passed_values[0]

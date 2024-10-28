@@ -40,7 +40,6 @@ def send_logs_image():
     os.remove('screenshot.png')
     
     
-    
 def send_logs_alert(alert_queue):
     #
     #   Checks whether there is duplicate alerts, if the recent alerts have not been sent in discord then send them
@@ -131,3 +130,5 @@ def add_alert_ping(alert):
     global ping_tracker
     ping_log[ping_tracker] = alert
     ping_tracker += 1
+    if ping_tracker > 29:
+        ping_tracker = 0
