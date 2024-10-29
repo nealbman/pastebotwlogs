@@ -132,3 +132,9 @@ def add_alert_ping(alert):
     ping_tracker += 1
     if ping_tracker > 29:
         ping_tracker = 0
+
+def send_need_food_alert():
+    embed = DiscordEmbed(title="**Bot Has 1 Food Left (1 Hour) DROP IT FOOD**",description='<@&1156655341946294325>')
+    webhook = DiscordWebhook(url= webhook_url)
+    webhook.add_embed(embed)
+    webhook.execute()

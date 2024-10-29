@@ -9,7 +9,7 @@ quit_all = True
 feed_tracker = 0
 depo_tracker = 0
 logs_timer = 0
-
+num_food = 0
 
 
 def run(feed_tracker, depo_tracker, logs_timer):
@@ -77,9 +77,14 @@ def feed_player():
     #
     #   Feeds player using slots 8 and 9 (if there is food left in player's inventory)
     #
+    global num_food
     print('Feeding Player...')
     pg.press('8')
     pg.press('9')
+    num_food += 1
+    if num_food >= 19:
+        ds.send_need_food_alert()
+        num_food = 0
     
 def on_press(key):
     #
