@@ -56,9 +56,8 @@ def send_logs_alert(alert_queue):
         for x in range(len(alert_queue)):
             print('x: '+ str(x))
             print('length: '+ str(len(alert_queue)))
-            webhook = DiscordWebhook(url= webhook_url)
+            webhook = DiscordWebhook(url= webhook_url, content='<@&1156655341946294325>')
             embed = DiscordEmbed(title="**!!ALERT!!**", color='ff0000',description=alert_queue[0])
-            embed.add_embed_field('**__**','<@&1156655341946294325>')
             webhook.add_embed(embed)
             webhook.execute()
             add_alert_ping(alert_queue[0])
@@ -134,7 +133,7 @@ def add_alert_ping(alert):
         ping_tracker = 0
 
 def send_need_food_alert():
-    embed = DiscordEmbed(title="**Bot Has 1 Food Left (1 Hour) DROP IT FOOD**",description='<@&1156655341946294325>')
-    webhook = DiscordWebhook(url= webhook_url)
+    embed = DiscordEmbed(title="**Bot Has 1 Food Left (1 Hour) DROP IT FOOD**",description=' ')
+    webhook = DiscordWebhook(url= webhook_url, content='<@&1156655341946294325>')
     webhook.add_embed(embed)
     webhook.execute()
