@@ -27,7 +27,7 @@ def run(feed_tracker, depo_tracker, logs_timer):
         depo_tracker = 0
     ulogs_timer = check_logs(logs_timer)
     end = time.time()
-    feed_tracker = round(end-start)
+    feed_tracker = feed_tracker + round(end-start)
     return feed_tracker,depo_tracker,ulogs_timer
 
 
