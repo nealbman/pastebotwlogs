@@ -3,41 +3,47 @@ import pyautogui
 import os
 import pytesseract
 import getserverinfo
+import cv2
+import numpy
+
 #tribe_log = []
 ping_log = ['']*30
 ping_tracker = 0
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-webhook_url = "https://discord.com/api/webhooks/1272103382563291198/oD0t_pcVjUh8Sdvk2fGSDJ0iwCyvOWpvOYrVnZrQVAz18RGI6Y4uaAwQHWdccDgYG5H0"
 
-#webhook_url = "https://discord.com/api/webhooks/1300158203316797490/SINK6iJS5GSfYoUouV-2MEd7Ln34Uf9xKpaHnh6qvvftiYK5HzFJERmBV-yLIlg-82ep"
+webhook_url = 'https://discord.com/api/webhooks/1272103382563291198/oD0t_pcVjUh8Sdvk2fGSDJ0iwCyvOWpvOYrVnZrQVAz18RGI6Y4uaAwQHWdccDgYG5H0'
 
-def screenshot() -> None:
+def screenshot():
     #
     #   Screenshots tribe log area on screen and saves it to "screenshot.png"
     #
     region = (750, 180, 430, 650)
-    screenshot = pyautogui.screenshot(region=region)
-    screenshot.save('screenshot.png')
+    screenshot = numpy.asarray(pyautogui.screenshot(region=region))
+    cv2.imwrite('screenshot.png',screenshot)
+    return screenshot
     
-def send_logs_image():
+def send_logs_image(status):
     #
     #   Takes screenshot
     #   Queries server information and sends basic information with raw screenshot to discord
     #   
     #   Calls function to compute if there is anything notable in logs, then removes the saved screenshot from the machine
     #
-    screenshot()
-    server_info = getserverinfo.get_server_info('9295')
+    
+    server_info = getserverinfo.get_server_info('9351')
     embed = DiscordEmbed(title="**Server Info**",description=str(server_info[0]))
     embed.add_embed_field(name='Players Online', value=(str(server_info[1]) + '/'+str(server_info[3])))
     embed.add_embed_field(name='Ingame Day', value=str(server_info[2]))
+    embed.add_embed_field(name='Status', value=str(status))
     webhook = DiscordWebhook(url= webhook_url)
     webhook.add_embed(embed)
+    compute_logs(screenshot())
     with open("screenshot.png", "rb") as f:
         webhook.add_file(file=f.read(), filename="example.jpg")
     webhook.execute()
-    compute_logs('screenshot.png')
     os.remove('screenshot.png')
+    
+    
     
     
 def send_logs_alert(alert_queue):
@@ -69,10 +75,14 @@ def compute_logs(raw_screenshot):
     #   Base function to gather the logs strings from the screenshot and call functions to:
     #   Check if there is any alert-worthy messages 
     #
-    raw_tribe_logs = pytesseract.image_to_string(raw_screenshot)
+    processed_image = preprocess_image(raw_screenshot)
+    raw_tribe_logs = pytesseract.image_to_string(processed_image, lang='eng')
     tribe_log = []
-    make_logs_list(raw_tribe_logs, tribe_log)  
-    alert_queue = check_for_alert(tribe_log)
+    make_logs_list(raw_tribe_logs, tribe_log)
+    try:  
+        alert_queue = check_for_alert(tribe_log)
+    except:
+        alert_queue = []
     if len(alert_queue) > 0:
         print('Alert Found...')
         send_logs_alert(alert_queue)
@@ -82,9 +92,15 @@ def make_logs_list(remaining_logs,tribe_log):
     #   Search through the strings created from the log image and extract each log instance as a list of strings
     #
     try:
-        if remaining_logs.find('!\n') != -1:
+        if remaining_logs.find(': ') != -1:
             start_log = remaining_logs.index('Day ')
             next_log = remaining_logs.index('!\n')
+            
+            # if the next day occurance is before the next !\n we have went too far so check for a different end to the log line
+            next_day_log = remaining_logs[start_log+1:].index('Day ')
+            if next_day_log < next_log:
+                next_log = remaining_logs.index(')\n')
+            
             tribe_log.append(remaining_logs[start_log:next_log+1].replace('\n',' '))
             remaining_logs = remaining_logs[next_log+1:]
             make_logs_list(remaining_logs, tribe_log)
@@ -137,3 +153,15 @@ def send_need_food_alert():
     webhook = DiscordWebhook(url= webhook_url, content='<@&1156655341946294325>')
     webhook.add_embed(embed)
     webhook.execute()
+    
+def preprocess_image(img):
+    
+    img = cv2.resize(img, None, fx=3,fy=3, interpolation = cv2.INTER_CUBIC)
+    
+    img = cv2.cvtColor(img,cv2.COLOR_BGR2BGRA)  
+    
+    cv2.imwrite('test.png', img)
+    
+
+    return img
+    

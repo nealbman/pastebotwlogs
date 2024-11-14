@@ -6,28 +6,26 @@ from tkinter import *
 
 run_bot = False
 quit_all = True
-feed_tracker = 0
 depo_tracker = 0
 logs_timer = 0
 num_food = 0
+feed_tracker = 0
 
 
 def run(feed_tracker, depo_tracker, logs_timer):
     #
     #   This is the main function for the program, only called in the main runtime loop
     #
-    start = time.time()
-    if feed_tracker >= 3600:  #eat every hour?
-        feed_player()
-        feed_tracker = 0
     grab_paste()
     depo_tracker += 1
+    feed_tracker += 1
     if depo_tracker >= 100:
         dump_paste()
         depo_tracker = 0
+    if feed_tracker >= 200:
+        feed_player()
+        feed_tracker = 0
     ulogs_timer = check_logs(logs_timer)
-    end = time.time()
-    feed_tracker = feed_tracker + round(end-start)
     return feed_tracker,depo_tracker,ulogs_timer
 
 
@@ -117,6 +115,5 @@ listener.start()
 while quit_all == True:
     while run_bot == True:
         passed_values = run(feed_tracker,depo_tracker,logs_timer)
-        feed_tracker = passed_values[0]
         depo_tracker = passed_values[1]
         logs_timer = passed_values[2]
